@@ -39,20 +39,14 @@ jobs:
         include:
           - build_platform: Android
             upload_platform: android
-            build_dir: build/Android
-            artifact_dir: cli/build/Android
-            profile_dir: cli/build/Android/*.pro
           - build_platform: iOS
             upload_platform: ios
-            build_dir: build/iOS
-            artifact_dir: cli/build/iOS
-            profile_dir: cli/build/iOS/*.pro
     defaults:
       run:
         working-directory: ./cli
 
     env:
-      RUN_PLATFORM_BUILD_JOB: ${{github.event_name != 'workflow_dispatch' || inputs.target_platform == 'All' || inputs.target_platform == matrix.build_platform}}
+      RUN_PLATFORM_BUILD_JOB: ${{ github.event_name != 'workflow_dispatch' || inputs.target_platform == 'All' || inputs.target_platform == matrix.build_platform }}
 
     steps:
       - name: Checkout repository
@@ -64,18 +58,18 @@ jobs:
         if: env.RUN_PLATFORM_BUILD_JOB == 'true'
         id: meta
         run: |
-          if [[ "${{github.event_name}}" == "workflow_dispatch" ]]
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]
           then
-            project_name="${{inputs.project_name}}"
-            project_version_base="${{inputs.project_version_base}}"
-            profile_build="${{inputs.profile_build}}"
+            project_name="${{ inputs.project_name }}"
+            project_version_base="${{ inputs.project_version_base }}"
+            profile_build="${{ inputs.profile_build }}"
           else
-            project_name="Build_${{github.ref_name}}_Branch"
+            project_name="Build_${{ github.ref_name }}_Branch"
             project_version_base="1.0"
             profile_build="false"
           fi
 
-          project_version="${project_version_base}.${{github.run_number}}"
+          project_version="${project_version_base}.${{ github.run_number }}"
 
           echo "project_name=$project_name" >> "$GITHUB_OUTPUT"
           echo "project_version=$project_version" >> "$GITHUB_OUTPUT"
@@ -86,15 +80,15 @@ jobs:
         if: env.RUN_PLATFORM_BUILD_JOB == 'true'
         run: |
           profile_arg=""
-          if [[ "${{steps.meta.outputs.profile_build}}" == "true" ]]
+          if [[ "${{ steps.meta.outputs.profile_build }}" == "true" ]]
           then
             profile_arg="--profile"
           fi
-          project_name="${{github.event.inputs.project_name}}"
+          project_name="${{ github.event.inputs.project_name }}"
           bash ./build.sh \
-            --platform "${{matrix.build_platform}}" \
-            --project-name "${{steps.meta.outputs.project_name}}" \
-            --version "${{steps.meta.outputs.project_version}}" \
+            --platform "${{ matrix.build_platform }}" \
+            --project-name "${{ steps.meta.outputs.project_name }}" \
+            --version "${{ steps.meta.outputs.project_version }}" \
             $profile_arg
 
       # Upload Build Artifacts for Development
@@ -102,10 +96,10 @@ jobs:
         if: env.RUN_PLATFORM_BUILD_JOB == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: ${{matrix.upload_platform}}-build-${{steps.meta.outputs.project_version}}
+          name: ${{ matrix.upload_platform }}-build-${{ steps.meta.outputs.project_version }}
           path: |
-            ${{matrix.artifact_dir}}
-            !${{matrix.profile_dir}}
+            cli/build/${{ matrix.build_platform }}
+            !cli/build/${{ matrix.build_platform }}/*.pro
           if-no-files-found: error
           retention-days: 30 # or maybe until end of production release cycle?
 
@@ -114,8 +108,8 @@ jobs:
         if: env.RUN_PLATFORM_BUILD_JOB == 'true' && steps.meta.outputs.profile_build == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: ${{matrix.upload_platform}}-profile-${{steps.meta.outputs.project_version}}
-          path: ${{matrix.profile_dir}}
+          name: ${{ matrix.upload_platform }}-profile-${{ steps.meta.outputs.project_version }}
+          path: cli/build/${{ matrix.build_platform }}/*.pro
           if-no-files-found: error
           retention-days: 7 # or maybe until end of sprint?
 
@@ -125,7 +119,7 @@ jobs:
         env:
           UPLOAD_TOKEN: dummy-token-credentials
         run: |
-          find ${{matrix.build_dir}} -type f | while read -r artifact
+          find build/${{ matrix.build_platform }} -type f | while read -r artifact
           do
-            bash ./upload.sh "${{matrix.upload_platform}}" "$artifact"
+            bash ./upload.sh "${{ matrix.upload_platform }}" "$artifact"
           done

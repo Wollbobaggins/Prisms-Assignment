@@ -69,3 +69,7 @@ Task 8
     1. [Task 8] Added Dev Artifacts Retention
         * changed upload for dev artifacts to have a month retention timeline
         * changed upload for dev profiling artifacts to have a week retention timeline
+    2. [Task 8] Reduced Matrix Include Child Keys
+        * changed path references to be uniform across platforms
+        * changed syntax for existing expressions to make them more readable
+        * removed paths within `Matrix Include` child keys
