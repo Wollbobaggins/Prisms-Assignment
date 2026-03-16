@@ -53,3 +53,6 @@ Task 6
         * added conditional use of the `--profile` argument defined within `build.sh`
         * added error check to dev artifacts uploads for if no files are found
         * changed names of existing steps slightly
+    2. [Task 6] Fixed Profiling Output
+        * changed non-profiling output to exclude profiling files
+        * fixed version naming error on profiling output

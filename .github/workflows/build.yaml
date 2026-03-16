@@ -72,7 +72,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: android-build-${{steps.meta.outputs.project_version}}
-          path: cli/build/Android
+          path: |
+            cli/build/Android
+            !cli/build/Android/*.pro
           if-no-files-found: error
 
       # Upload Profiling Artifacts for Development
@@ -80,7 +82,7 @@ jobs:
         if: steps.meta.outputs.profile_build == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: android-profile-${{steps.meta.outputs.version}}
+          name: android-profile-${{steps.meta.outputs.project_version}}
           path: cli/build/Android/*.pro
           if-no-files-found: error
 
