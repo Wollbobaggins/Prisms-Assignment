@@ -16,6 +16,15 @@ on:
         required: true
         type: boolean
         default: false
+      target_platform:
+        description: Platform to build
+        required: true
+        type: choice
+        default: All
+        options:
+          - All
+          - Android
+          - iOS
   push:
     branches:
       - main # the production branch
@@ -23,16 +32,36 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - build_platform: Android
+            upload_platform: android
+            build_dir: build/Android
+            artifact_dir: cli/build/Android
+            profile_dir: cli/build/Android/*.pro
+          - build_platform: iOS
+            upload_platform: ios
+            build_dir: build/iOS
+            artifact_dir: cli/build/iOS
+            profile_dir: cli/build/iOS/*.pro
     defaults:
       run:
         working-directory: ./cli
 
+    env:
+      RUN_PLATFORM_BUILD_JOB: ${{github.event_name != 'workflow_dispatch' || inputs.target_platform == 'All' || inputs.target_platform == matrix.build_platform}}
+
     steps:
       - name: Checkout repository
+        if: env.RUN_PLATFORM_BUILD_JOB == 'true'
         uses: actions/checkout@v2
 
       # Prepare build metadata
       - name: Set Build Metadata
+        if: env.RUN_PLATFORM_BUILD_JOB == 'true'
         id: meta
         run: |
           if [[ "${{github.event_name}}" == "workflow_dispatch" ]]
@@ -54,6 +83,7 @@ jobs:
         
       # CLI call to simulated build process
       - name: Run Build
+        if: env.RUN_PLATFORM_BUILD_JOB == 'true'
         run: |
           profile_arg=""
           if [[ "${{steps.meta.outputs.profile_build}}" == "true" ]]
@@ -62,37 +92,38 @@ jobs:
           fi
           project_name="${{github.event.inputs.project_name}}"
           bash ./build.sh \
-            --platform Android \
+            --platform "${{matrix.build_platform}}" \
             --project-name "${{steps.meta.outputs.project_name}}" \
             --version "${{steps.meta.outputs.project_version}}" \
             $profile_arg
 
       # Upload Build Artifacts for Development
       - name: Upload Build Artifacts for Development
+        if: env.RUN_PLATFORM_BUILD_JOB == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: android-build-${{steps.meta.outputs.project_version}}
+          name: ${{matrix.upload_platform}}-build-${{steps.meta.outputs.project_version}}
           path: |
-            cli/build/Android
-            !cli/build/Android/*.pro
+            ${{matrix.artifact_dir}}
+            !${{matrix.profile_dir}}
           if-no-files-found: error
 
       # Upload Profiling Artifacts for Development
       - name: Upload Profiling Artifacts for Development
-        if: steps.meta.outputs.profile_build == 'true'
+        if: env.RUN_PLATFORM_BUILD_JOB == 'true' || steps.meta.outputs.profile_build == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: android-profile-${{steps.meta.outputs.project_version}}
-          path: cli/build/Android/*.pro
+          name: ${{matrix.upload_platform}}-profile-${{steps.meta.outputs.project_version}}
+          path: ${{matrix.profile_dir}}
           if-no-files-found: error
 
       # CLI call to simulated upload process
       - name: Upload to CDN
-        if: github.event_name == 'push' && github.ref_name == 'main'
+        if: env.RUN_PLATFORM_BUILD_JOB == 'true' || github.event_name == 'push' && github.ref_name == 'main'
         env:
           UPLOAD_TOKEN: dummy-token-credentials
         run: |
-          find build/Android -type f | while read -r artifact
+          find ${{matrix.build_dir}} -type f | while read -r artifact
           do
-            bash ./upload.sh android "$artifact"
+            bash ./upload.sh "${{matrix.upload_platform}}" "$artifact"
           done

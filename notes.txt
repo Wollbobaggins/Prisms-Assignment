@@ -56,3 +56,10 @@ Task 6
     2. [Task 6] Fixed Profiling Output
         * changed non-profiling output to exclude profiling files
         * fixed version naming error on profiling output
+Task 7
+    1. [Task 7] Added Matrix Build 
+        * added iOS build support
+        * added support for future build options
+        * added matrix parameters for each supported target platform
+        * added environment key to prevent a matrix job from running
+        * removed hardcoded Android support
