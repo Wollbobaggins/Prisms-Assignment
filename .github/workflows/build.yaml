@@ -22,6 +22,8 @@ jobs:
 
       # CLI call to simulated upload process
       - name: Upload
+        env:
+          UPLOAD_TOKEN: dummy-token-credentials
         run: |
           find build/Android -type f | while read -r artifact
           do

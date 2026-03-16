@@ -9,5 +9,7 @@ Task 3
         * added `platform` parameter
         * added command to loop to fetch all artifacts within the output build directory then upload them
         * fixed broken upload process command
+    3. [Task 3] Added Upload Process UPLOAD_TOKEN
+        * fixed missing `UPLOAD_TOKEN` environment variable
     3. additional notes:
         A. I don't like that the platform for Build/Upload is not sanitized, maybe we can fix this later
