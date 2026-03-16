@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       project_name:
-        description: Name of the project/application build
+        description: Name of project/app build
         required: true
         default: Test App
       project_version_base:
-        description: Base project version number
+        description: Base project/app version number
         required: true
         default: "1.0"
   push:
@@ -35,7 +35,7 @@ jobs:
             project_name="${{inputs.project_name}}"
             project_version_base="${{inputs.project_version_base}}"
           else
-            project_name="{{github.ref_name}} App"
+            project_name="Build_${{github.ref_name}}_Branch"
             project_version_base="1.0"
           fi
 
@@ -43,6 +43,13 @@ jobs:
 
           echo "project_name=$project_name" >> "$GITHUB_OUTPUT"
           echo "project_version=$project_version" >> "$GITHUB_OUTPUT"
+
+      # Upload Build Artifacts for Development
+      - name: Upload Build Artifact for Development
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build-${{steps.meta.outputs.version}}
+          path: cli/build/Android
         
       # CLI call to simulated build process
       - name: Run Build

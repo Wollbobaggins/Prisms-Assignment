@@ -35,3 +35,7 @@ Task 5
         * added new workflow step to prepare build metadata given inputs
         * added versioning as an input parameter to the Build step
         * added GitHub conditional on the Upload step if the "push to production" event occurs 
+    3. [Task 5] Adding Dev Artifacts Upload
+        * added upload for development-only artifacts using GitHub's upload-artifact action
+        * changed input descriptions
+        * fixed error with project_name
