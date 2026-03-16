@@ -43,13 +43,6 @@ jobs:
 
           echo "project_name=$project_name" >> "$GITHUB_OUTPUT"
           echo "project_version=$project_version" >> "$GITHUB_OUTPUT"
-
-      # Upload Build Artifacts for Development
-      - name: Upload Build Artifact for Development
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-build-${{steps.meta.outputs.version}}
-          path: cli/build/Android
         
       # CLI call to simulated build process
       - name: Run Build
@@ -59,6 +52,14 @@ jobs:
             --platform Android \
             --project-name "${{steps.meta.outputs.project_name}}" \
             --version "${{steps.meta.outputs.project_version}}"
+
+      # Upload Build Artifacts for Development
+      - name: Upload Build Artifact for Development
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build-${{steps.meta.outputs.project_version}}
+          path: cli/build/Android
+          if-no-files-found: error
 
       # CLI call to simulated upload process
       - name: Upload

@@ -39,3 +39,9 @@ Task 5
         * added upload for development-only artifacts using GitHub's upload-artifact action
         * changed input descriptions
         * fixed error with project_name
+    4. [Task 5] Fixed Dev Artifacts Upload
+        * fixed step order, dev artifacts upload ran before build
+        * fixed typo with `meta.outputs.version`
+    5. additional notes:
+        A. Might be nice to add semantic versioning
+        B. Maybe check to see if no files are found after collecting artifacts for dev upload; failing loudly if a future change breaks build output
