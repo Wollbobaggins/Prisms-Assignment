@@ -23,3 +23,15 @@ Task 4
         ```
         Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v2. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
         ```
+Task 5
+    1. Summary of Task:
+        A. needs versioning input param
+        B. only upload if push to a production branch 
+        C. how versioning? semantic versioning system? incremental?
+        D. when do we run build?
+    2. [Task 5] Versioning & Custom Build and Upload
+        * added `project_version_base` to the `workflow_dispatch` inputs
+        * added workflow trigger on `push` event to a production branch
+        * added new workflow step to prepare build metadata given inputs
+        * added versioning as an input parameter to the Build step
+        * added GitHub conditional on the Upload step if the "push to production" event occurs 

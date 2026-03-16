@@ -7,6 +7,13 @@ on:
         description: Name of the project/application build
         required: true
         default: Test App
+      project_version_base:
+        description: Base project version number
+        required: true
+        default: "1.0"
+  push:
+    branches:
+      - main # the production branch
 
 jobs:
   build:
@@ -18,15 +25,37 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      # Prepare build metadata
+      - name: Set Build Metadata
+        id: meta
+        run: |
+          if [[ "${{github.event_name}}" == "workflow_dispatch" ]]
+          then
+            project_name="${{inputs.project_name}}"
+            project_version_base="${{inputs.project_version_base}}"
+          else
+            project_name="{{github.ref_name}} App"
+            project_version_base="1.0"
+          fi
+
+          project_version="${project_version_base}.${{github.run_number}}"
+
+          echo "project_name=$project_name" >> "$GITHUB_OUTPUT"
+          echo "project_version=$project_version" >> "$GITHUB_OUTPUT"
         
       # CLI call to simulated build process
       - name: Run Build
         run: |
           project_name="${{github.event.inputs.project_name}}"
-          bash ./build.sh --platform Android --project-name "$project_name"
+          bash ./build.sh \
+            --platform Android \
+            --project-name "${{steps.meta.outputs.project_name}}" \
+            --version "${{steps.meta.outputs.project_version}}"
 
       # CLI call to simulated upload process
       - name: Upload
+        if: github.event_name == 'push' && github.ref_name == 'main'
         env:
           UPLOAD_TOKEN: dummy-token-credentials
         run: |
