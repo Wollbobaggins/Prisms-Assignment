@@ -80,3 +80,26 @@ Task 8
         * added `needs: prepare` to the `Build` step
         * removed erroneous line defining `project_name` in the `Build` step
         * removed the guard `RUN_PLATFORM_BUILD_JOB` environment key to run on each step
+
+Conclusion
+    Design Choices
+    A. `main` as production branch
+        * I thought it made sense to use GitHub's `main` branch as the production branch; could add additional `production` branch triggers
+    B. Why save artifacts in GitHub?
+        * I wanted to restrict the CDN upload to production-branch push events as mentioned in the requirements, but I also thought it made
+            sense to ensure manual dev builds are preserved in GitHub without being deployed. This way development or QA can easily create 
+            builds or refer to past created builds over the last 30 days (I thought this duration made sense).
+    C. Why keep profiling separate?
+        * I think having the default artifacts separate from profiling made sense; the default artifacts are always the same regardless of 
+            profiling, and additionally profiling data could be discarded after a week when its not needed and the more important build data 
+            can be saved for a longer period
+    D. Why does production pushes disable profiling?
+        * production pushes are for final deployment, it doesn't make sense to deploy/upload profiling artifacts that are used for 
+            development and QA
+    E. Why is there a `prepare` job?
+        * I wanted to disable the creation of erroneous platform build jobs. As a result, I created a new job (prepare) and used the output
+            from this step to prevent unnecessary build jobs.
+    F. Next Todo
+        * I think the next best step is to add unit testing to the CI/CD pipeline. Assuming this was for Unity mobile builds, the next best
+            action would be to create a self-hosted runner with Unity downloaded (and licensed) onto it. Then I would create a matrix step
+            to test the branch and platform before running the build step.This step is essential for solid CI/CD deployment in my opinion.
