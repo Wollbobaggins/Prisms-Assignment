@@ -73,3 +73,5 @@ Task 8
         * changed path references to be uniform across platforms
         * changed syntax for existing expressions to make them more readable
         * removed paths within `Matrix Include` child keys
+    3. [Task 8] Added Concurrency
+        * added concurrency to prevent stale jobs from completing
