@@ -1,1 +1,6 @@
-This file left intentionally blank as an example file for you to fill in with your notes
+Task 3
+    1. [Task 3] Changed Build Process
+        * added `bash` to run `build.sh`
+        * fixed `android` -> `Android`
+        * fixed `appName = "Test App"` -> `appName="Test App"`
+        * fixed `${$appName}` -> `"$appName"`
