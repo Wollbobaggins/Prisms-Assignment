@@ -2,6 +2,11 @@ name: Run Build
 
 on:
   workflow_dispatch:
+    inputs:
+      project_name:
+        description: Name of the project/application build
+        required: true
+        default: Test App
 
 jobs:
   build:
@@ -17,8 +22,8 @@ jobs:
       # CLI call to simulated build process
       - name: Run Build
         run: |
-          appName="Test App"
-          bash ./build.sh --platform Android --project-name "$appName"
+          project_name="${{github.event.inputs.project_name}}"
+          bash ./build.sh --platform Android --project-name "$project_name"
 
       # CLI call to simulated upload process
       - name: Upload
