@@ -34,32 +34,41 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Set matrix
+        id: set-matrix
+        run: |
+          if [[ "${{ github.event_name }}" != "workflow_dispatch" || "${{ inputs.target_platform }}" == "All" ]]
+          then
+            echo 'matrix={"include":[{"build_platform":"Android","upload_platform":"android"},{"build_platform":"iOS","upload_platform":"ios"}]}' >> "$GITHUB_OUTPUT"
+          elif [[ "${{ inputs.target_platform }}" == "Android" ]]
+          then
+            echo 'matrix={"include":[{"build_platform":"Android","upload_platform":"android"}]}' >> "$GITHUB_OUTPUT"
+          else
+            echo 'matrix={"include":[{"build_platform":"iOS","upload_platform":"ios"}]}' >> "$GITHUB_OUTPUT"
+          fi
+
   build:
+    needs: prepare
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       max-parallel: 2
-      matrix:
-        include:
-          - build_platform: Android
-            upload_platform: android
-          - build_platform: iOS
-            upload_platform: ios
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
     defaults:
       run:
         working-directory: ./cli
 
-    env:
-      RUN_PLATFORM_BUILD_JOB: ${{ github.event_name != 'workflow_dispatch' || inputs.target_platform == 'All' || inputs.target_platform == matrix.build_platform }}
-
     steps:
       - name: Checkout repository
-        if: env.RUN_PLATFORM_BUILD_JOB == 'true'
         uses: actions/checkout@v2
 
       # Prepare build metadata
       - name: Set Build Metadata
-        if: env.RUN_PLATFORM_BUILD_JOB == 'true'
         id: meta
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]
@@ -81,14 +90,12 @@ jobs:
         
       # CLI call to simulated build process
       - name: Run Build
-        if: env.RUN_PLATFORM_BUILD_JOB == 'true'
         run: |
           profile_arg=""
           if [[ "${{ steps.meta.outputs.profile_build }}" == "true" ]]
           then
             profile_arg="--profile"
           fi
-          project_name="${{ github.event.inputs.project_name }}"
           bash ./build.sh \
             --platform "${{ matrix.build_platform }}" \
             --project-name "${{ steps.meta.outputs.project_name }}" \
@@ -97,7 +104,6 @@ jobs:
 
       # Upload Build Artifacts for Development
       - name: Upload Build Artifacts for Development
-        if: env.RUN_PLATFORM_BUILD_JOB == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.upload_platform }}-build-${{ steps.meta.outputs.project_version }}
@@ -109,7 +115,7 @@ jobs:
 
       # Upload Profiling Artifacts for Development
       - name: Upload Profiling Artifacts for Development
-        if: env.RUN_PLATFORM_BUILD_JOB == 'true' && steps.meta.outputs.profile_build == 'true'
+        if: steps.meta.outputs.profile_build == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.upload_platform }}-profile-${{ steps.meta.outputs.project_version }}
@@ -119,7 +125,7 @@ jobs:
 
       # CLI call to simulated upload process
       - name: Upload to CDN
-        if: env.RUN_PLATFORM_BUILD_JOB == 'true' && github.event_name == 'push' && github.ref_name == 'main'
+        if: github.event_name == 'push' && github.ref_name == 'main'
         env:
           UPLOAD_TOKEN: dummy-token-credentials
         run: |

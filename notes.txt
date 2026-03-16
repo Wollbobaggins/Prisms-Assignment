@@ -75,3 +75,8 @@ Task 8
         * removed paths within `Matrix Include` child keys
     3. [Task 8] Added Concurrency
         * added concurrency to prevent stale jobs from completing
+    4. [Task 8] Removing Unnecessary Matrix Jobs
+        * added functionality to prevent the creation of unselected platform job
+        * added `needs: prepare` to the `Build` step
+        * removed erroneous line defining `project_name` in the `Build` step
+        * removed the guard `RUN_PLATFORM_BUILD_JOB` environment key to run on each step
