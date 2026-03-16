@@ -65,3 +65,7 @@ Task 7
         * removed hardcoded Android support
     2. [Task 7] Fixed Matrix Build Conditional
         * fixed matrix build conditional `or` that should have been `and`
+Task 8
+    1. [Task 8] Added Dev Artifacts Retention
+        * changed upload for dev artifacts to have a month retention timeline
+        * changed upload for dev profiling artifacts to have a week retention timeline

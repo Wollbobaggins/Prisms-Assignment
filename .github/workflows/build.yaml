@@ -107,6 +107,7 @@ jobs:
             ${{matrix.artifact_dir}}
             !${{matrix.profile_dir}}
           if-no-files-found: error
+          retention-days: 30 # or maybe until end of production release cycle?
 
       # Upload Profiling Artifacts for Development
       - name: Upload Profiling Artifacts for Development
@@ -116,6 +117,7 @@ jobs:
           name: ${{matrix.upload_platform}}-profile-${{steps.meta.outputs.project_version}}
           path: ${{matrix.profile_dir}}
           if-no-files-found: error
+          retention-days: 7 # or maybe until end of sprint?
 
       # CLI call to simulated upload process
       - name: Upload to CDN
