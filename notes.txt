@@ -63,3 +63,5 @@ Task 7
         * added matrix parameters for each supported target platform
         * added environment key to prevent a matrix job from running
         * removed hardcoded Android support
+    2. [Task 7] Fixed Matrix Build Conditional
+        * fixed matrix build conditional `or` that should have been `and`

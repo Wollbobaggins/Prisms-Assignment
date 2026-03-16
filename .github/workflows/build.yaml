@@ -110,7 +110,7 @@ jobs:
 
       # Upload Profiling Artifacts for Development
       - name: Upload Profiling Artifacts for Development
-        if: env.RUN_PLATFORM_BUILD_JOB == 'true' || steps.meta.outputs.profile_build == 'true'
+        if: env.RUN_PLATFORM_BUILD_JOB == 'true' && steps.meta.outputs.profile_build == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: ${{matrix.upload_platform}}-profile-${{steps.meta.outputs.project_version}}
@@ -119,7 +119,7 @@ jobs:
 
       # CLI call to simulated upload process
       - name: Upload to CDN
-        if: env.RUN_PLATFORM_BUILD_JOB == 'true' || github.event_name == 'push' && github.ref_name == 'main'
+        if: env.RUN_PLATFORM_BUILD_JOB == 'true' && github.event_name == 'push' && github.ref_name == 'main'
         env:
           UPLOAD_TOKEN: dummy-token-credentials
         run: |
