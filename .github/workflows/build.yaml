@@ -23,4 +23,7 @@ jobs:
       # CLI call to simulated upload process
       - name: Upload
         run: |
-          ./upload.sh build/android"
+          find build/Android -type f | while read -r artifact
+          do
+            bash ./upload.sh android "$artifact"
+          done

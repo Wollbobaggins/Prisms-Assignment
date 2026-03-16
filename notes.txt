@@ -4,3 +4,10 @@ Task 3
         * fixed `android` -> `Android`
         * fixed `appName = "Test App"` -> `appName="Test App"`
         * fixed `${$appName}` -> `"$appName"`
+    2. [Task 3] Changed Upload Process
+        * added `bash` to run `upload.sh`
+        * added `platform` parameter
+        * added command to loop to fetch all artifacts within the output build directory then upload them
+        * fixed broken upload process command
+    3. additional notes:
+        A. I don't like that the platform for Build/Upload is not sanitized, maybe we can fix this later
