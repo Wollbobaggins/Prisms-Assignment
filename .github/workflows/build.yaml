@@ -11,6 +11,11 @@ on:
         description: Base project/app version number
         required: true
         default: "1.0"
+      profile_build:
+        description: Generate profiling data
+        required: true
+        type: boolean
+        default: false
   push:
     branches:
       - main # the production branch
@@ -34,35 +39,53 @@ jobs:
           then
             project_name="${{inputs.project_name}}"
             project_version_base="${{inputs.project_version_base}}"
+            profile_build="${{inputs.profile_build}}"
           else
             project_name="Build_${{github.ref_name}}_Branch"
             project_version_base="1.0"
+            profile_build="false"
           fi
 
           project_version="${project_version_base}.${{github.run_number}}"
 
           echo "project_name=$project_name" >> "$GITHUB_OUTPUT"
           echo "project_version=$project_version" >> "$GITHUB_OUTPUT"
+          echo "profile_build=$profile_build" >> "$GITHUB_OUTPUT"
         
       # CLI call to simulated build process
       - name: Run Build
         run: |
+          profile_arg=""
+          if [[ "${{steps.meta.outputs.profile_build}}" == "true" ]]
+          then
+            profile_arg="--profile"
+          fi
           project_name="${{github.event.inputs.project_name}}"
           bash ./build.sh \
             --platform Android \
             --project-name "${{steps.meta.outputs.project_name}}" \
-            --version "${{steps.meta.outputs.project_version}}"
+            --version "${{steps.meta.outputs.project_version}}" \
+            $profile_arg
 
       # Upload Build Artifacts for Development
-      - name: Upload Build Artifact for Development
+      - name: Upload Build Artifacts for Development
         uses: actions/upload-artifact@v4
         with:
           name: android-build-${{steps.meta.outputs.project_version}}
           path: cli/build/Android
           if-no-files-found: error
 
+      # Upload Profiling Artifacts for Development
+      - name: Upload Profiling Artifacts for Development
+        if: steps.meta.outputs.profile_build == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-profile-${{steps.meta.outputs.version}}
+          path: cli/build/Android/*.pro
+          if-no-files-found: error
+
       # CLI call to simulated upload process
-      - name: Upload
+      - name: Upload to CDN
         if: github.event_name == 'push' && github.ref_name == 'main'
         env:
           UPLOAD_TOKEN: dummy-token-credentials

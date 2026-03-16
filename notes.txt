@@ -45,3 +45,11 @@ Task 5
     5. additional notes:
         A. Might be nice to add semantic versioning
         B. Maybe check to see if no files are found after collecting artifacts for dev upload; failing loudly if a future change breaks build output
+        C. ^ never mind, I added the check!
+Task 6
+    1. [Task 6] Added Build Profiling Support
+        * added `profile_build` to the `workflow_dispatch` inputs
+        * added `profile_build` field to `steps.meta.outputs`
+        * added conditional use of the `--profile` argument defined within `build.sh`
+        * added error check to dev artifacts uploads for if no files are found
+        * changed names of existing steps slightly
